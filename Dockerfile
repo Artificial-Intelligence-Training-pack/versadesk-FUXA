@@ -6,7 +6,10 @@ FROM node:18-bookworm
 
 ARG NODE_SNAP=false
 
-RUN apt-get update && apt-get install -y dos2unix nginx gettext && \
+# Install build dependencies for node-odbc
+RUN apt-get update && apt-get install -y dos2unix build-essential unixodbc unixodbc-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     mkdir -p /usr/src/app/FUXA
 
 # Change working directory
@@ -17,9 +20,6 @@ COPY . .
 
 # Change working directory
 WORKDIR /usr/src/app
-
-# Install build dependencies for node-odbc
-RUN apt-get update && apt-get install -y build-essential unixodbc unixodbc-dev
 
 # Convert the script to Unix format and make it executable
 RUN dos2unix FUXA/odbc/install_odbc_drivers.sh && chmod +x FUXA/odbc/install_odbc_drivers.sh
