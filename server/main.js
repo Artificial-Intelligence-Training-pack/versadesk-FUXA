@@ -16,6 +16,7 @@ const FUXA = require('./fuxa.js');
 
 const express = require('express');
 const app = express();
+const baseUrl = process.env.URL_prefix || '';
 
 var server;
 var settingsFile;
@@ -28,12 +29,12 @@ var knownOpts = {
     "userDir": [path]
 };
 var shortHands = {
-    "?":["--help"],
-    "p":["--port"],
-    "u":["--userDir"]
+    "?": ["--help"],
+    "p": ["--port"],
+    "u": ["--userDir"]
 };
 
-nopt.invalidHandler = function(k,v,t) {
+nopt.invalidHandler = function (k, v, t) {
     // TODO: console.log(k,v,t);
 }
 
@@ -54,7 +55,7 @@ if (parsedArgs.help) {
 var rootDir = __dirname;
 var workDir = path.resolve(process.cwd(), '_appdata');
 
-if(process.env.userDir){
+if (process.env.userDir) {
     rootDir = process.env.userDir;
     workDir = path.resolve(process.env.userDir, '_appdata');
 }
@@ -219,16 +220,17 @@ if (settings.https) {
 }
 server.setMaxListeners(0);
 
-const io = socketIO(server);
+// const io = socketIO(server);
+const io = socketIO(server, { path: `${baseUrl}/socket.io/` });
 
 // Check settings value
 var www = path.resolve(__dirname, '../client/dist');
 settings.httpStatic = settings.httpStatic || www;
 
-if (parsedArgs.port !== undefined){
+if (parsedArgs.port !== undefined) {
     settings.uiPort = parsedArgs.port;
 } else {
-    if (settings.uiPort === undefined){
+    if (settings.uiPort === undefined) {
         settings.uiPort = 1881;
     }
 }
@@ -243,7 +245,7 @@ events.once('init-runtime-ok', function () {
 // Init FUXA
 try {
     FUXA.init(server, io, settings, logger, events);
-} catch(err) {
+} catch (err) {
     if (err.code == 'unsupported_version') {
         logger.error('Unsupported version of node.js:', process.version);
         logger.error('FUXA requires node.js v6 or later');
@@ -261,7 +263,7 @@ try {
 }
 
 // Http Server for client UI
-var allowCrossDomain = function(req, res, next) {
+var allowCrossDomain = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'x-access-token, x-auth-user, Origin, Content-Type, Accept');
@@ -275,20 +277,20 @@ var allowCrossDomain = function(req, res, next) {
     }
 }
 app.use(allowCrossDomain);
-app.use('/', express.static(settings.httpStatic));
-app.use('/home', express.static(settings.httpStatic));
-app.use('/home/:viewName', express.static(settings.httpStatic));
-app.use('/lab', express.static(settings.httpStatic));
-app.use('/editor', express.static(settings.httpStatic));
-app.use('/device', express.static(settings.httpStatic));
-app.use('/rodevice', express.static(settings.httpStatic));
-app.use('/users', express.static(settings.httpStatic));
-app.use('/view', express.static(settings.httpStatic));
-app.use('/' + settings.httpUploadFileStatic, express.static(settings.uploadFileDir));
-app.use('/_images', express.static(settings.imagesFileDir));
-app.use('/_widgets', express.static(settings.widgetsFileDir));
+app.use(`${baseUrl}/`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/home`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/home/:viewName`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/lab`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/editor`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/device`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/rodevice`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/users`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/view`, express.static(settings.httpStatic));
+app.use(`${baseUrl}/${settings.httpUploadFileStatic}`, express.static(settings.uploadFileDir));
+app.use(`${baseUrl}/_images`, express.static(settings.imagesFileDir));
+app.use(`${baseUrl}/_widgets`, express.static(settings.widgetsFileDir));
 
-var accessLogStream = fs.createWriteStream(settings.logDir + '/api.log', {flags: 'a'});
+var accessLogStream = fs.createWriteStream(settings.logDir + '/api.log', { flags: 'a' });
 app.use(morgan('combined', {
     stream: accessLogStream,
     skip: function (req, res) { return res.statusCode < 400 }
@@ -318,7 +320,7 @@ app.use(morgan('dev', {
 
 // set api to listen
 if (settings.disableServer !== false) {
-    app.use('/', FUXA.httpApi);
+    app.use(`${baseUrl}/`, FUXA.httpApi);
 }
 
 function getListenPath() {
@@ -330,6 +332,9 @@ function getListenPath() {
     var listenPath = 'http' + (settings.https ? 's' : '') + '://' +
         (settings.uiHost == '::' ? 'localhost' : (settings.uiHost == '0.0.0.0' ? '127.0.0.1' : settings.uiHost)) +
         ':' + port;
+    if (baseUrl) {
+        listenPath += baseUrl;
+    }
     if (settings.httpStatic) {
         listenPath += '/';
     }
@@ -387,7 +392,7 @@ process.on('uncaughtException', function (err) {
 });
 
 process.on('SIGINT', function () {
-    FUXA.stop().then(function() {
+    FUXA.stop().then(function () {
         process.exit();
     });
     logger.info('FUXA end!');

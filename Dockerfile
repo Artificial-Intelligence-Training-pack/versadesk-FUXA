@@ -1,14 +1,22 @@
+# Creates Docker Container
+# docker run -it -p 1881:1881 -e URL_prefix="/test" --name test versadesk/fuxa:1.2.2
+# docker build -t versadesk/fuxa:1.2.2 .
+
 FROM node:18-bookworm
 
 ARG NODE_SNAP=false
 
-RUN apt-get update && apt-get install -y dos2unix
+RUN apt-get update && apt-get install -y dos2unix nginx gettext && \
+    mkdir -p /usr/src/app/FUXA
+
+# Change working directory
+WORKDIR /usr/src/app/FUXA
+
+# ADD FUXA File
+COPY . .
 
 # Change working directory
 WORKDIR /usr/src/app
-
-# Clone FUXA repository
-RUN git clone https://github.com/frangoteam/FUXA.git
 
 # Install build dependencies for node-odbc
 RUN apt-get update && apt-get install -y build-essential unixodbc unixodbc-dev

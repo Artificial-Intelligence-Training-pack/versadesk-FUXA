@@ -36,8 +36,8 @@ function init(_server, _runtime) {
                 includes(runtime.settings.logApiLevel) ? runtime.settings.logApiLevel : 'combined'));
 
             var maxApiRequestSize = runtime.settings.apiMaxLength || '35mb';
-            apiApp.use(bodyParser.json({limit:maxApiRequestSize}));
-            apiApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
+            apiApp.use(bodyParser.json({ limit: maxApiRequestSize }));
+            apiApp.use(bodyParser.urlencoded({ limit: maxApiRequestSize, extended: true }));
             authJwt.init(runtime.settings.secureEnabled, runtime.settings.secretCode, runtime.settings.tokenExpiresIn);
             prjApi.init(runtime, authJwt.verifyToken, verifyGroups);
             apiApp.use(prjApi.app());
@@ -92,12 +92,12 @@ function init(_server, _runtime) {
             /**
              * POST Server user settings
              */
-            apiApp.post("/api/settings", authJwt.verifyToken, function(req, res, next) {
+            apiApp.post('/api/settings', authJwt.verifyToken, function (req, res, next) {
                 const permission = verifyGroups(req);
                 if (res.statusCode === 403) {
                     runtime.logger.error("api post settings: Tocken Expired");
                 } else if (!authJwt.haveAdminPermission(permission)) {
-                    res.status(401).json({error:"unauthorized_error", message: "Unauthorized!"});
+                    res.status(401).json({ error: "unauthorized_error", message: "Unauthorized!" });
                     runtime.logger.error("api post settings: Unauthorized");
                 } else {
                     try {
@@ -106,7 +106,7 @@ function init(_server, _runtime) {
                         }
                         fs.writeFileSync(runtime.settings.userSettingsFile, JSON.stringify(req.body, null, 4));
                         mergeUserSettings(req.body);
-                        runtime.restart(true).then(function(result) {
+                        runtime.restart(true).then(function (result) {
                             res.end();
                         });
                     } catch (err) {
