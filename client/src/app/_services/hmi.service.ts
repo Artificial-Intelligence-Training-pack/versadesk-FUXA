@@ -171,18 +171,16 @@ export class HmiService {
             return;
         }
         this.socket?.close();
-        console.log('socket io 測試');
-        // this.socket = io(`${this.endPointConfig}/?token=${token}`);
-        this.socket = io(this.endPointConfig, {
+
+        const port = window.location.port ? `:${window.location.port}` : '';
+        this.socket = io(`${window.location.protocol}//${window.location.hostname}${port}`, {
             path: `${this.endPointConfig}/socket.io`, // 確保完整路徑
             query: { token }
         });
         this.socket.on('connect', () => {
-            console.log('socket io 登入成功');
             this.onServerConnection$.next(true);
         });
         this.socket.on('disconnect', () => {
-            console.log('socket io 登入失敗');
             this.onServerConnection$.next(false);
         });
         // devicse status
