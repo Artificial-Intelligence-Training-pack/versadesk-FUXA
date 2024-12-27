@@ -81,7 +81,7 @@ export class HtmlImageComponent extends GaugeBaseComponent {
                     image.style['height'] = '100%';
                     image.style['border'] = 'none';
                     if (gaugeSettings.property && gaugeSettings.property.address) {
-                        image.setAttribute('src', gaugeSettings.property.address);
+                        image.setAttribute('src', this.endPointConfig+gaugeSettings.property.address);
                     }
                     svgImageContainer.appendChild(image);
                 }

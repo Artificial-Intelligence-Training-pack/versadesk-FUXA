@@ -126,9 +126,9 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
         private resolver: ComponentFactoryResolver,
         private libWidgetsService: LibWidgetsService,
         private mdIconRegistry: MatIconRegistry, private sanitizer: DomSanitizer) {
-        mdIconRegistry.addSvgIcon('group', sanitizer.bypassSecurityTrustResourceUrl('/assets/images/group.svg'));
-        mdIconRegistry.addSvgIcon('to_bottom', sanitizer.bypassSecurityTrustResourceUrl('/assets/images/to-bottom.svg'));
-        mdIconRegistry.addSvgIcon('to_top', sanitizer.bypassSecurityTrustResourceUrl('/assets/images/to-top.svg'));
+        mdIconRegistry.addSvgIcon('group', sanitizer.bypassSecurityTrustResourceUrl('assets/images/group.svg'));
+        mdIconRegistry.addSvgIcon('to_bottom', sanitizer.bypassSecurityTrustResourceUrl('assets/images/to-bottom.svg'));
+        mdIconRegistry.addSvgIcon('to_top', sanitizer.bypassSecurityTrustResourceUrl('assets/images/to-top.svg'));
     }
 
     //#region Implemented onInit / onAfterInit event

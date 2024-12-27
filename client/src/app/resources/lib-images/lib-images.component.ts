@@ -37,7 +37,7 @@ export class LibImagesComponent implements AfterViewInit, OnDestroy {
             const groups = result?.groups || [];
             groups.forEach(group => {
                 group.items.forEach(item => {
-                    item.path = `${this.endPointConfig}/${item.path}`;
+                    item.path = `${item.path}`;
                 });
             });
             this.resImages = groups;
